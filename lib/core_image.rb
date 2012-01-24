@@ -1,30 +1,35 @@
+# CORE IMAGE GEM
+# Created by Spencer Rogers on January 24, 2012
+# https://github.com/serogers
+
 class CoreImage
   require 'osx/cocoa'
-  
-  # CORE IMAGE PROTOTYPE
-  # Created by Spencer Rogers on January 24, 2012
   
   attr_accessor :image_path
   attr_accessor :original_image
   attr_accessor :ciimage
-  attr_accessor :bitmap
   
   def initialize(object)
     initialize_image(object)
   end
   
-  def scale(ratio)
+  def scale(ratio = 1)
     scaleFilter = OSX::CGAffineTransformMakeScale(ratio, ratio)
     self.ciimage = self.ciimage.imageByApplyingTransform(scaleFilter)
     self
-  end # scale
+  end
   
-  def rotate(degrees)
+  def scale_to_size(maximum = 500)
+    dimensions = size_to_fit_maximum(maximum)
+    scale(dimensions[:ratio])
+  end
+  
+  def rotate(degrees = 0)
     radians = degrees_to_radians(degrees)
     transform = OSX::CGAffineTransformMakeRotation(radians)
     self.ciimage = self.ciimage.imageByApplyingTransform(transform)
     self
-  end # rotate
+  end
   
   def flip_horizontal
     transform = OSX::CGAffineTransformMakeScale(-1.0, 1.0)
@@ -38,14 +43,28 @@ class CoreImage
     self
   end # crop
   
-  def tint(x, y, w, h, rgb_string)
-    context = create_ci_context(w, h)
+  def tint(rgb_string)
+    image_size = size
+    context = create_ci_context(image_size[:width], image_size[:height])
     colored_image = OSX::CIImage.imageWithColor(OSX::CIColor.colorWithString(rgb_string))
     filter = OSX::CIFilter.filterWithName("CIMultiplyCompositing")
     filter.setValue_forKey(colored_image, "inputImage")
     filter.setValue_forKey(self.ciimage, "inputBackgroundImage")
     new_image = filter.valueForKey("outputImage")
-    new_image.drawAtPoint_fromRect_operation_fraction(OSX::NSMakePoint(x, y), OSX::NSRectFromCGRect(new_image.extent), OSX::NSCompositeCopy, 1.0)
+    new_image.drawAtPoint_fromRect_operation_fraction(OSX::NSZeroPoint, OSX::NSRectFromCGRect(new_image.extent), OSX::NSCompositeCopy, 1.0)
+    self.ciimage = new_image
+    self
+  end
+  
+  def overlay_image(object)
+    image = open_object(object)
+    image_size = size
+    context = create_ci_context(image_size[:width], image_size[:height])    
+    filter = OSX::CIFilter.filterWithName("CISourceOverCompositing")
+    filter.setValue_forKey(image, "inputImage")
+    filter.setValue_forKey(self.ciimage, "inputBackgroundImage")
+    new_image = filter.valueForKey("outputImage")
+    new_image.drawAtPoint_fromRect_operation_fraction(OSX::NSZeroPoint, OSX::NSRectFromCGRect(new_image.extent), OSX::NSCompositeCopy, 1.0)
     self.ciimage = new_image
     self
   end
@@ -66,7 +85,7 @@ class CoreImage
     width, height = 0, 0
     
     begin # sometimes ciimage.extent throws an error
-      size = self.image.extent.size
+      size = self.ciimage.extent.size
       width = size.width
       height = size.height
     rescue
@@ -84,6 +103,14 @@ class CoreImage
   	{:width => width, :height => height}
   end
   
+  def size_to_fit_maximum(max = 500)    
+    image_size = size
+    width = image_size[:width].to_f
+    height = image_size[:height].to_f
+    ratio = width > height ? max.to_f / width : max.to_f / height rescue 1
+    {:width => (width * ratio).to_i, :height => (height * ratio).to_i, :ratio => ratio}
+  end
+  
   def revert
     self.ciimage = self.original_image
     self
@@ -97,21 +124,21 @@ class CoreImage
   private
   
   def initialize_image(object)
+    self.ciimage = open_object(object)
+    self.image_path = object if object.class == String
     
-    case object.class.to_s
-    when "String"
-      self.image_path = object
-      if File.extname(object).downcase == ".pdf"
-        self.ciimage = open_from_pdf_path(object)
-      else
-        self.ciimage = open_from_path(object)
-      end
-    when "OSX::CIImage"
-      self.ciimage = object
-    end
-    
+    # remember the original image for reversion
     if self.ciimage
       self.original_image = self.ciimage
+    end
+  end
+  
+  def open_object(object)
+    case object.class.to_s
+    when "String"
+      ciimage = File.extname(object).downcase == ".pdf" ? open_from_pdf_path(object) : open_from_path(object)
+    when "OSX::CIImage"
+      ciimage = object
     end
   end
   
@@ -179,8 +206,8 @@ class CoreImage
   end
   
   def create_ns_context(width, height)
-    bitmapRep = OSX::NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(nil, width, height, 8, 4, true, false, OSX::NSDeviceRGBColorSpace, 0, 0)
-    context = OSX::NSGraphicsContext.graphicsContextWithBitmapImageRep(bitmapRep)
+    blank_bitmap = OSX::NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(nil, width, height, 8, 4, true, false, OSX::NSDeviceRGBColorSpace, 0, 0)
+    context = OSX::NSGraphicsContext.graphicsContextWithBitmapImageRep(blank_bitmap)
     OSX::NSGraphicsContext.setCurrentContext(context)
     context
   end # createContext
