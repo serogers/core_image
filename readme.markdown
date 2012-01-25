@@ -19,3 +19,9 @@ Simple image manipulation using Apple's Core Image technology.
 	image.flip_horizontal
 	image.save # oh no!
 	image.revert #=> reverts to the original image
+
+### Requirements ###
+Requires Mac OS X to run.
+
+### Support ###
+Serveral updates are in the works but feel free to report issues, make comments, voice concerns and I'll get to them when I can! Enjoy!
