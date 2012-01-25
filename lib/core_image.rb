@@ -198,7 +198,6 @@ class CoreImage
     when ".bmp"
       OSX::NSBMPFileType
     end
-    
   end
   
   def create_ci_context(width, height)
