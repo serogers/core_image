@@ -21,7 +21,7 @@ Simple image manipulation using Apple's Core Image technology.
 	image.revert #=> reverts to the original image
 
 ### File Types ###
-Core Image can open and save the following formats: jpeg, png, tiff, gif, pct, and bmp.  It can also open pdfs and save them as one of the support image formats.
+Core Image can open and save the following formats: jpeg, png, tiff, gif, pct, and bmp.  It can also open pdfs and save them as one of the previously listed image formats.
 
 ### Requirements ###
 Requires Mac OS X to run.
