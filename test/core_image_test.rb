@@ -11,6 +11,12 @@ context 'Core Image' do
     asserts("Opens pdf file") {CoreImage.new("./test/images/test.pdf").ciimage.nil? == false}
   end
   
+  context 'opens apple image object' do
+    asserts("Opens ciimage") {CoreImage.new(topic.ciimage).ciimage.class.to_s == "OSX::CIImage"}
+    asserts("Opens cgimage") {CoreImage.new(topic.to_cgimage).ciimage.class.to_s == "OSX::CIImage"}
+    asserts("Opens nsimage") {CoreImage.new(topic.to_nsimage).ciimage.class.to_s == "OSX::CIImage"}
+  end
+  
   context '.scale(1.5)' do
     asserts("Image was scaled up by 150%") {topic.scale(1.5).size == {:width => 75, :height => 75}}
   end
@@ -54,8 +60,7 @@ context 'Core Image' do
   end
   
   context '.color_at' do
-    # selecting blue area
-    setup {topic.color_at(10, 10)}
+    setup {topic.color_at(10, 10)} # select pixel from blue area
     asserts("Blue equals R:0, G:0, B:255, A:1.0") {topic == solid_blue_rgb}
   end
   
@@ -67,6 +72,11 @@ context 'Core Image' do
   context '.to_cgimage' do
     setup {topic.to_cgimage}
     asserts("Is a cgimage") {topic.class.to_s == "OSX::NSObject"}
+  end
+  
+  context '.to_nsimage' do
+    setup {topic.to_nsimage}
+    asserts("Is a nsimage") {topic.class.to_s == "OSX::NSImage"}
   end
   
   context '.size' do

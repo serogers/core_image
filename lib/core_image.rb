@@ -89,6 +89,14 @@ class CoreImage
     to_bitmap.CGImage
   end
   
+  def to_nsimage
+    image_size = self.size
+    nsimage_rep = OSX::NSCIImageRep.imageRepWithCIImage(self.ciimage)
+    nsimage = OSX::NSImage.alloc.initWithSize(OSX::NSMakeSize(image_size[:width], image_size[:height]))
+    nsimage.addRepresentation(nsimage_rep)
+    nsimage
+  end
+  
   def size
     width, height = 0, 0
     
@@ -146,6 +154,11 @@ class CoreImage
       ciimage = File.extname(object).downcase == ".pdf" ? open_from_pdf_path(object) : open_from_path(object)
     when "OSX::CIImage"
       ciimage = object
+    when "OSX::CGImage", "OSX::NSObject"
+      OSX::CIImage.imageWithCGImage(object)
+    when "OSX::NSImage"
+      tiff_data = object.TIFFRepresentation
+      OSX::CIImage.imageWithData(tiff_data)
     end
   end
   
