@@ -102,9 +102,9 @@ class CoreImage
     width, height = 0, 0
     
     begin # sometimes ciimage.extent throws an error
-      size = self.ciimage.extent.size
-      width = size.width
-      height = size.height
+      image_size = self.ciimage.extent.size
+      width = image_size.width
+      height = image_size.height
     rescue
       begin
         cgimage = self.to_cgimage
