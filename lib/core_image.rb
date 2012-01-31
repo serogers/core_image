@@ -47,9 +47,9 @@ class CoreImage
     self
   end # crop
   
-  def tint(rgb_string)
+  def tint(rgb)
     context = set_context
-    colored_image = OSX::CIImage.imageWithColor(OSX::CIColor.colorWithString(rgb_string))
+    colored_image = OSX::CIImage.imageWithColor(OSX::CIColor.colorWithString(rgb_hash_to_string(rgb)))
     filter = OSX::CIFilter.filterWithName("CIMultiplyCompositing")
     filter.setValue_forKey(colored_image, "inputImage")
     filter.setValue_forKey(self.ciimage, "inputBackgroundImage")
@@ -223,5 +223,9 @@ class CoreImage
     OSX::NSGraphicsContext.setCurrentContext(context)
     context
   end # createContext
+  
+  def rgb_hash_to_string(rgb)
+    "#{rgb[:red].to_f / 255.0} #{rgb[:green].to_f / 255.0} #{rgb[:blue].to_f / 255.0} #{rgb[:alpha].to_f}"
+  end
 
 end

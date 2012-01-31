@@ -5,6 +5,7 @@ require './lib/core_image.rb'
 context 'Core Image' do
   
   setup {CoreImage.new("./test/images/test.png")}
+  helper(:solid_blue_rgb) { {:red => 0, :green => 0, :blue => 255, :alpha => 1.0} }
   
   context '.scale(1.5)' do
     asserts("Image was scaled up by 150%") {topic.scale(1.5).size == {:width => 75, :height => 75}}
@@ -20,22 +21,22 @@ context 'Core Image' do
   
   context '.rotate(90)' do
     setup {topic.rotate(90).color_at(10, 40)}
-    asserts("Image was rotated by 90 degrees") {topic == {:red => 0, :green => 0, :blue => 255, :alpha => 1.0}}
+    asserts("Image was rotated by 90 degrees") {topic == solid_blue_rgb}
   end
   
   context '.rotate(-90)' do
     setup {topic.rotate(-90).color_at(40, 10)}
-    asserts("Image was rotated by -90 degrees") {topic == {:red => 0, :green => 0, :blue => 255, :alpha => 1.0}}
+    asserts("Image was rotated by -90 degrees") {topic == solid_blue_rgb}
   end
   
   context '.flip_horizontally' do
     setup {topic.flip_horizontally.color_at(40, 10)}
-    asserts("Image was flipped on its x-axis") {topic == {:red => 0, :green => 0, :blue => 255, :alpha => 1.0}}
+    asserts("Image was flipped on its x-axis") {topic == solid_blue_rgb}
   end
   
   context '.flip_vertically' do
     setup {topic.flip_vertically.color_at(10, 40)}
-    asserts("Image was flipped on its y-axis") {topic == {:red => 0, :green => 0, :blue => 255, :alpha => 1.0}}
+    asserts("Image was flipped on its y-axis") {topic == solid_blue_rgb}
   end
   
   context '.crop' do
@@ -43,10 +44,15 @@ context 'Core Image' do
     asserts("Image was cropped to a 25 pixel box starting in lower left") {topic.size == {:width => 25, :height => 25} and topic.color_at(10, 2) == {:red => 0, :green => 128, :blue => 0, :alpha => 1.0}}
   end
   
+  context '.tint' do
+    setup {topic.tint(solid_blue_rgb)}
+    asserts("Image was tinted a dark blue") {topic.color_at(40, 10) == {:red => 28, :green => 57, :blue => 246, :alpha => 1.0}}
+  end
+  
   context '.color_at' do
     # selecting blue area
     setup {topic.color_at(10, 10)}
-    asserts("Blue equals R:0, G:0, B:255, A:1.0") {topic == {:red => 0, :green => 0, :blue => 255, :alpha => 1.0}}
+    asserts("Blue equals R:0, G:0, B:255, A:1.0") {topic == solid_blue_rgb}
   end
   
   context '.to_bitmap' do
