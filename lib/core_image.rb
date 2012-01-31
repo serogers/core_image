@@ -24,17 +24,21 @@ class CoreImage
     scale(dimensions[:ratio])
   end
   
-  def rotate(degrees = 0)
+  def rotate(degrees = 90)
     radians = degrees_to_radians(degrees)
     transform = OSX::CGAffineTransformMakeRotation(radians)
     self.ciimage = self.ciimage.imageByApplyingTransform(transform)
     self
   end
   
-  def flip_horizontal
+  def flip_horizontally
     transform = OSX::CGAffineTransformMakeScale(-1.0, 1.0)
     self.ciimage = self.ciimage.imageByApplyingTransform(transform)
     self
+  end
+  
+  def flip_vertically
+    flip_horizontally.rotate(180)
   end
   
   def crop(x, y, w, h)
@@ -44,8 +48,7 @@ class CoreImage
   end # crop
   
   def tint(rgb_string)
-    image_size = size
-    context = create_ci_context(image_size[:width], image_size[:height])
+    context = set_context
     colored_image = OSX::CIImage.imageWithColor(OSX::CIColor.colorWithString(rgb_string))
     filter = OSX::CIFilter.filterWithName("CIMultiplyCompositing")
     filter.setValue_forKey(colored_image, "inputImage")
@@ -58,8 +61,7 @@ class CoreImage
   
   def overlay_image(object)
     image = open_object(object)
-    image_size = size
-    context = create_ci_context(image_size[:width], image_size[:height])    
+    context = set_context
     filter = OSX::CIFilter.filterWithName("CISourceOverCompositing")
     filter.setValue_forKey(image, "inputImage")
     filter.setValue_forKey(self.ciimage, "inputBackgroundImage")
@@ -69,8 +71,14 @@ class CoreImage
     self
   end
   
-  def color_at(x, y)
-    to_bitmap.colorAtX_y(x, y) # returns NSColor
+  def color_at(x, y) # starts at upper left
+    nscolor = to_bitmap.colorAtX_y(x, y)
+    rgb = {}
+    rgb[:red] = (nscolor.redComponent.to_f * 255.0).to_i
+    rgb[:green] = (nscolor.greenComponent.to_f * 255.0).to_i
+    rgb[:blue] = (nscolor.blueComponent.to_f * 255.0).to_i
+    rgb[:alpha] = nscolor.alphaComponent
+    rgb
   end
   
   def to_bitmap
@@ -200,6 +208,11 @@ class CoreImage
     end
   end
   
+  def set_context
+    image_size = size
+    create_ci_context(image_size[:width], image_size[:height])
+  end
+  
   def create_ci_context(width, height)
     create_ns_context(width, height).CIContext
   end
@@ -210,5 +223,5 @@ class CoreImage
     OSX::NSGraphicsContext.setCurrentContext(context)
     context
   end # createContext
-  
+
 end
