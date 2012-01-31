@@ -72,6 +72,7 @@ class CoreImage
   end
   
   def color_at(x, y) # starts at upper left
+    set_context
     nscolor = to_bitmap.colorAtX_y(x, y)
     rgb = {}
     rgb[:red] = (nscolor.redComponent.to_f * 255.0).to_i
@@ -155,7 +156,7 @@ class CoreImage
   end # open
   
   def open_from_pdf_path(pdf_path, scale = 1, dpi = 72.0, preserve_alpha = false)
-    data = OSX::NSData.dataWithContentsOfURL(OSX::NSURL.fileURLWithPath(pdfPath))
+    data = OSX::NSData.dataWithContentsOfURL(OSX::NSURL.fileURLWithPath(pdf_path))
     pdf_rep = OSX::NSPDFImageRep.imageRepWithData(data)
     nsimage = OSX::NSImage.alloc.initWithData(data)
     nssize = nsimage.size
@@ -182,7 +183,7 @@ class CoreImage
     cgimage = OSX::CGBitmapContextCreateImage(context.graphicsPort)
     
     # return a ciimage
-    OSX::CIImage.initWithCGImage(cgimage)
+    OSX::CIImage.imageWithCGImage(cgimage)
   end
   
   def degrees_to_radians(degrees)
@@ -218,7 +219,7 @@ class CoreImage
   end
   
   def create_ns_context(width, height)
-    blank_bitmap = OSX::NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(nil, width, height, 8, 4, true, false, OSX::NSDeviceRGBColorSpace, 0, 0)
+    blank_bitmap = OSX::NSBitmapImageRep.alloc.initWithBitmapDataPlanes_pixelsWide_pixelsHigh_bitsPerSample_samplesPerPixel_hasAlpha_isPlanar_colorSpaceName_bytesPerRow_bitsPerPixel(nil, width, height, 8, 4, true, false, OSX::NSCalibratedRGBColorSpace, 0, 0)
     context = OSX::NSGraphicsContext.graphicsContextWithBitmapImageRep(blank_bitmap)
     OSX::NSGraphicsContext.setCurrentContext(context)
     context

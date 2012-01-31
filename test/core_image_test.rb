@@ -2,10 +2,14 @@ require 'rubygems'
 require 'riot'
 require './lib/core_image.rb'
 
-context 'Core Image' do
-  
+context 'Core Image' do  
   setup {CoreImage.new("./test/images/test.png")}
   helper(:solid_blue_rgb) { {:red => 0, :green => 0, :blue => 255, :alpha => 1.0} }
+  
+  context 'opens file' do
+    asserts("Opens image file") {topic.ciimage.nil? == false}
+    asserts("Opens pdf file") {CoreImage.new("./test/images/test.pdf").ciimage.nil? == false}
+  end
   
   context '.scale(1.5)' do
     asserts("Image was scaled up by 150%") {topic.scale(1.5).size == {:width => 75, :height => 75}}
@@ -46,7 +50,7 @@ context 'Core Image' do
   
   context '.tint' do
     setup {topic.tint(solid_blue_rgb)}
-    asserts("Image was tinted a dark blue") {topic.color_at(40, 10) == {:red => 28, :green => 57, :blue => 246, :alpha => 1.0}}
+    asserts("Image was tinted a dark blue") {topic.color_at(40, 10) == solid_blue_rgb}
   end
   
   context '.color_at' do
