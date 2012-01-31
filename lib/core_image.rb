@@ -59,7 +59,7 @@ class CoreImage
     self
   end
   
-  def overlay_image(object)
+  def overlay(object)
     image = open_object(object)
     context = set_context
     filter = OSX::CIFilter.filterWithName("CISourceOverCompositing")
@@ -152,14 +152,16 @@ class CoreImage
   def open_object(object)
     case object.class.to_s
     when "String"
-      ciimage = open_from_location(object)
+      open_from_location(object)
     when "OSX::CIImage"
-      ciimage = object
+      object
     when "OSX::CGImage", "OSX::NSObject"
       OSX::CIImage.imageWithCGImage(object)
     when "OSX::NSImage"
       tiff_data = object.TIFFRepresentation
       OSX::CIImage.imageWithData(tiff_data)
+    when "CoreImage"
+      object.ciimage
     end
   end
   

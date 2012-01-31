@@ -18,6 +18,10 @@ context 'Core Image' do
     asserts("Opens nsimage") {CoreImage.new(topic.to_nsimage).ciimage.class.to_s == "OSX::CIImage"}
   end
   
+  context 'opens image from self' do
+    asserts("Opens from core_image instantiation") {CoreImage.new(topic).ciimage.class.to_s == "OSX::CIImage"}
+  end
+  
   context '.scale(1.5)' do
     asserts("Image was scaled up by 150%") {topic.scale(1.5).size == {:width => 75, :height => 75}}
   end
@@ -58,6 +62,10 @@ context 'Core Image' do
   context '.tint' do
     setup {topic.tint(solid_blue_rgb)}
     asserts("Image was tinted a dark blue") {topic.color_at(40, 10) == solid_blue_rgb}
+  end
+  
+  context '.overlay' do
+    setup {topic.overlay(CoreImage.new("./test/images/overlay.png")).color_at(40, 10) == solid_blue_rgb}
   end
   
   context '.color_at' do
