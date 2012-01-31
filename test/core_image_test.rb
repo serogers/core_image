@@ -9,6 +9,7 @@ context 'Core Image' do
   context 'opens file' do
     asserts("Opens image file") {topic.ciimage.nil? == false}
     asserts("Opens pdf file") {CoreImage.new("./test/images/test.pdf").ciimage.nil? == false}
+    asserts("Opens file from the internet") {CoreImage.new("http://dl.dropbox.com/u/1848018/core_image_test.png").ciimage.nil? == false}
   end
   
   context 'opens apple image object' do

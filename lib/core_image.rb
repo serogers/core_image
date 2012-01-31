@@ -4,6 +4,7 @@
 
 class CoreImage
   require 'osx/cocoa'
+  require 'uri'
   
   attr_accessor :image_path
   attr_accessor :original_image
@@ -151,7 +152,7 @@ class CoreImage
   def open_object(object)
     case object.class.to_s
     when "String"
-      ciimage = File.extname(object).downcase == ".pdf" ? open_from_pdf_path(object) : open_from_path(object)
+      ciimage = open_from_location(object)
     when "OSX::CIImage"
       ciimage = object
     when "OSX::CGImage", "OSX::NSObject"
@@ -162,12 +163,17 @@ class CoreImage
     end
   end
   
-  def open_from_path(path_to_image)
-    OSX::CIImage.imageWithContentsOfURL(OSX::NSURL.fileURLWithPath(path_to_image))
+  def open_from_location(string)
+    nsurl = valid_url?(string) ? nsurl_from_url(string) : nsurl_from_path(string)
+    File.extname(string).downcase == ".pdf" ? open_from_pdf(nsurl) : open_from_image_file(nsurl)
   end
   
-  def open_from_pdf_path(pdf_path, scale = 1, dpi = 72.0, preserve_alpha = false)
-    data = OSX::NSData.dataWithContentsOfURL(OSX::NSURL.fileURLWithPath(pdf_path))
+  def open_from_image_file(nsurl)
+    OSX::CIImage.imageWithContentsOfURL(nsurl)
+  end
+  
+  def open_from_pdf(nsurl, scale = 1, dpi = 72.0, preserve_alpha = false)
+    data = OSX::NSData.dataWithContentsOfURL(nsurl)
     pdf_rep = OSX::NSPDFImageRep.imageRepWithData(data)
     nsimage = OSX::NSImage.alloc.initWithData(data)
     nssize = nsimage.size
@@ -239,6 +245,21 @@ class CoreImage
   def rgb_hash_to_string(rgb)
     rgb[:alpha] = 1.0 if rgb[:alpha].nil?
     "#{rgb[:red].to_f / 255.0} #{rgb[:green].to_f / 255.0} #{rgb[:blue].to_f / 255.0} #{rgb[:alpha].to_f}"
+  end
+  
+  def valid_url?(string)
+    uri = URI.parse(string)
+    %w( http https ).include?(uri.scheme) and uri.path.nil? == false
+  rescue URI::BadURIError
+    false
+  end
+  
+  def nsurl_from_path(path)
+    OSX::NSURL.fileURLWithPath(path)
+  end
+  
+  def nsurl_from_url(url)
+    OSX::NSURL.URLWithString(url)
   end
 
 end
