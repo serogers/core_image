@@ -224,6 +224,7 @@ class CoreImage
   end
   
   def rgb_hash_to_string(rgb)
+    rgb[:alpha] = 1.0 if rgb[:alpha].nil?
     "#{rgb[:red].to_f / 255.0} #{rgb[:green].to_f / 255.0} #{rgb[:blue].to_f / 255.0} #{rgb[:alpha].to_f}"
   end
 
