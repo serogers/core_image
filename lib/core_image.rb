@@ -41,8 +41,7 @@ class CoreImage
     flip_horizontally.rotate(180)
   end
   
-  def crop(x, y, w, h)
-    # coordinates start in lower left
+  def crop(x, y, w, h) # coordinates start in lower left
     self.ciimage = self.ciimage.imageByCroppingToRect(OSX::CGRectMake(x, y, w, h))
     self
   end # crop
@@ -71,7 +70,7 @@ class CoreImage
     self
   end
   
-  def color_at(x, y) # starts at upper left
+  def color_at(x, y) # coordinates start in upper left
     set_context
     nscolor = to_bitmap.colorAtX_y(x, y)
     rgb = {}
@@ -98,16 +97,15 @@ class CoreImage
       width = size.width
       height = size.height
     rescue
-      # if image.extent fails, use another method for measuring size (by converting to a cgimage)
       begin
         cgimage = self.to_cgimage
       	width = OSX::CGImageGetWidth(cgimage)
       	height = OSX::CGImageGetHeight(cgimage)
-    	rescue # if the second image size function fails set zero
+    	rescue
     	  width = 0
     	  height = 0
-  	  end # begin/rescue
-  	end # begin/rescue
+  	  end
+  	end
   	
   	{:width => width, :height => height}
   end
@@ -153,7 +151,7 @@ class CoreImage
   
   def open_from_path(path_to_image)
     OSX::CIImage.imageWithContentsOfURL(OSX::NSURL.fileURLWithPath(path_to_image))
-  end # open
+  end
   
   def open_from_pdf_path(pdf_path, scale = 1, dpi = 72.0, preserve_alpha = false)
     data = OSX::NSData.dataWithContentsOfURL(OSX::NSURL.fileURLWithPath(pdf_path))
@@ -223,7 +221,7 @@ class CoreImage
     context = OSX::NSGraphicsContext.graphicsContextWithBitmapImageRep(blank_bitmap)
     OSX::NSGraphicsContext.setCurrentContext(context)
     context
-  end # createContext
+  end
   
   def rgb_hash_to_string(rgb)
     "#{rgb[:red].to_f / 255.0} #{rgb[:green].to_f / 255.0} #{rgb[:blue].to_f / 255.0} #{rgb[:alpha].to_f}"
