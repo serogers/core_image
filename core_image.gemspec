@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name         = "core_image"
-  spec.version      = "0.0.3"
+  spec.version      = "0.0.3.5"
   spec.date         = "2012-01-31"
   spec.summary      = "Manipulate images via Apple's built-in Core Image technology"
   spec.description  = "Simple image manipulation using Apple's Core Image technology. Scale, rotate, flip, convert, overlay, and more."
