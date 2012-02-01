@@ -252,7 +252,7 @@ class CoreImage
   def valid_url?(string)
     uri = URI.parse(string)
     %w( http https ).include?(uri.scheme) and uri.path.nil? == false
-  rescue URI::BadURIError
+  rescue
     false
   end
   
